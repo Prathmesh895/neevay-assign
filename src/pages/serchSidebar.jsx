@@ -60,13 +60,6 @@ function SearchSidebar() {
         <div className='mt-24 min-h-screen '>
             <aside className='m-5 space-y-5 pb-10'>
                 <h1 className='font-bold text-2xl ' title='filter'>Filters</h1>
-                <div className="relative group">
-                    <h1 className='font-bold text-2xl text-gray-800'>Filters</h1>
-                    <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-full mt-2 bg-white text-gray-800 text-sm font-bold rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        Tooltip content goes here
-                    </div>
-                </div>
-
                 {/* Verified Vendors Only */}
                 <div className='flex items-center space-x-2 w-full justify-between'>
                     <div className='flex items-center space-x-2'>
@@ -95,11 +88,10 @@ function SearchSidebar() {
                         <p>Search by Office Address Only</p>
                         <div className="relative group inline-block">
                             <BsFillQuestionCircleFill size={14} className='text-gray-700' />
-                            <div className="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-white text-gray-800 text-sm font-bold rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                                Only show vendors with office <br /> location in the selected city
+                            <div className="z-50 absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-white text-gray-800 text-sm font-bold rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-pre-wrap">
+                                Only show vendors with office location in the selected city
                             </div>
                         </div>
-
                     </div>
                     <div className="flex items-center space-x-4">
                         <label className="relative inline-flex items-center cursor-pointer">
