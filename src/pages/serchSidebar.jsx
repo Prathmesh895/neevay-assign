@@ -1,27 +1,71 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { RiVerifiedBadgeFill } from "react-icons/ri";
 import { BsFillQuestionCircleFill } from "react-icons/bs";
 import { IoIosArrowDown } from "react-icons/io";
+import { useSearchParams } from 'react-router-dom';
+
 
 function SearchSidebar() {
-    const [isVerifiedOnly, setIsVerifiedOnly] = useState(false);
-    const [isOfficeAddressOnly, setIsOfficeAddressOnly] = useState(false);
-
-    const [turnoverRange, setTurnoverRange] = useState(50); // Default to 50 for midpoint
-    const [projectCompletion, setProjectCompletion] = useState(0);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [isVerifiedOnly, setIsVerifiedOnly] = useState(searchParams.get("verifiedStatus") === "true" || false);
+    const [isOfficeAddressOnly, setIsOfficeAddressOnly] = useState(searchParams.get("officeAddress") === "true" || false);
+    const [turnoverRange, setTurnoverRange] = useState(searchParams.get("turnover") || '50'); // Default to 50
+    const [projectCompletion, setProjectCompletion] = useState(searchParams.get("projectsCompleted") || 0);
+    const [marketSector, setMarketSector] = useState(searchParams.get("marketSector") || '');
+    const [laborStrength, setLaborStrength] = useState(searchParams.get("laborStrength") || '');
+    const [businessAge, setBusinessAge] = useState(searchParams.get("businessAge") || '');
 
     const handleToggleVerified = () => setIsVerifiedOnly(!isVerifiedOnly);
     const handleToggleOfficeAddress = () => setIsOfficeAddressOnly(!isOfficeAddressOnly);
     const handleTurnoverChange = (e) => setTurnoverRange(e.target.value);
     const handleProjectCompletionChange = (e) => setProjectCompletion(e.target.value);
+    const handleSelectChange = (setter, value) => setter(value);
+
+    useEffect(() => {
+        const params = {
+            verifiedStatus: isVerifiedOnly ? "true" : '',
+            officeAddress: isOfficeAddressOnly ? "true" : '',
+            turnover: turnoverRange !== '50' ? turnoverRange : '', // Only set turnover if it's not the default
+            projectsCompleted: projectCompletion,
+            marketSector: marketSector || '', // Ensure market sector is only set if selected
+            laborStrength,
+            businessAge
+        };
+
+        const newSearchParams = new URLSearchParams();
+        Object.keys(params).forEach(key => {
+            if (params[key]) {
+                newSearchParams.set(key, params[key]);
+            }
+        });
+
+        setSearchParams(newSearchParams);
+    }, [isVerifiedOnly, isOfficeAddressOnly, turnoverRange, projectCompletion, marketSector, laborStrength, businessAge]);
 
     const turnoverThumbPosition = Math.min(Math.max((turnoverRange / 100) * 100, 5), 95);
     const projectCompletionThumbPosition = Math.min(Math.max((projectCompletion / 100) * 100, 5), 95);
 
+    // Reset all filters
+    const resetAll = () => {
+        setIsVerifiedOnly(false);
+        setIsOfficeAddressOnly(false);
+        setTurnoverRange('50');
+        setProjectCompletion(0);
+        setMarketSector('');
+        setLaborStrength('');
+        setBusinessAge('');
+    };
+
     return (
         <div className='mt-24 min-h-screen '>
             <aside className='m-5 space-y-5 pb-10'>
-                <h1 className='font-bold text-2xl '>Filters</h1>
+                <h1 className='font-bold text-2xl ' title='filter'>Filters</h1>
+                <div className="relative group">
+                    <h1 className='font-bold text-2xl text-gray-800'>Filters</h1>
+                    <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-full mt-2 bg-white text-gray-800 text-sm font-bold rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        Tooltip content goes here
+                    </div>
+                </div>
 
                 {/* Verified Vendors Only */}
                 <div className='flex items-center space-x-2 w-full justify-between'>
@@ -48,7 +92,13 @@ function SearchSidebar() {
                 <div className='flex items-center space-x-2  w-full justify-between'>
                     <div className='flex items-center space-x-2'>
                         <p>Search by Office Address Only</p>
-                        <BsFillQuestionCircleFill size={14} className='text-gray-700' />
+                        <div className="relative group inline-block">
+                            <BsFillQuestionCircleFill size={14} className='text-gray-700' />
+                            <div className="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-white text-gray-800 text-sm font-bold rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                                Only show vendors with office <br /> location in the selected city
+                            </div>
+                        </div>
+
                     </div>
                     <div className="flex items-center space-x-4">
                         <label className="relative inline-flex items-center cursor-pointer">
@@ -72,12 +122,24 @@ function SearchSidebar() {
                         <IoIosArrowDown />
                     </h1>
                     <ul className='space-y-1 mt-2'>
-                        <li className='space-x-2 flex items-center'><input type="checkbox" name='marketsector' /><p>Healthcare</p></li>
-                        <li className='space-x-2 flex items-center'> <input type="checkbox" name='market-sector' /><p>Industrial</p></li>
-                        <li className='space-x-2 flex items-center'><input type="checkbox" /><p>Infrastructure</p></li>
-                        <li className='space-x-2 flex items-center'><input type="checkbox" /><p>Residential</p></li>
-                        <li className='space-x-2 flex items-center'><input type="checkbox" /><p>Commercial</p></li>
-                        <li className='space-x-2 flex items-center'><input type="checkbox" /><p>Hospitals</p></li>
+                        <li className='space-x-2 flex items-center'>
+                            <input type="radio" name="marketSector" value="Healthcare" onChange={(e) => setMarketSector(e.target.value)} /><p>Healthcare</p>
+                        </li>
+                        <li className='space-x-2 flex items-center'>
+                            <input type="radio" name="marketSector" value="Industrial" onChange={(e) => setMarketSector(e.target.value)} /><p>Industrial</p>
+                        </li>
+                        <li className='space-x-2 flex items-center'>
+                            <input type="radio" name="marketSector" value="Infrastructure" onChange={(e) => setMarketSector(e.target.value)} /><p>Infrastructure</p>
+                        </li>
+                        <li className='space-x-2 flex items-center'>
+                            <input type="radio" name="marketSector" value="Residential" onChange={(e) => setMarketSector(e.target.value)} /><p>Residential</p>
+                        </li>
+                        <li className='space-x-2 flex items-center'>
+                            <input type="radio" name="marketSector" value="Commercial" onChange={(e) => setMarketSector(e.target.value)} /><p>Commercial</p>
+                        </li>
+                        <li className='space-x-2 flex items-center'>
+                            <input type="radio" name="marketSector" value="Hospitals" onChange={(e) => setMarketSector(e.target.value)} /><p>Hospitals</p>
+                        </li>
                     </ul>
                 </div>
 
@@ -121,7 +183,6 @@ function SearchSidebar() {
                             <p className="font-semibold">₹ {turnoverRange} Lakh</p>
                         </div>
                     </div>
-
                 </div>
 
                 {/* Labor Strength */}
@@ -131,33 +192,32 @@ function SearchSidebar() {
                         <IoIosArrowDown />
                     </h1>
                     <ul className='space-y-1 mt-2'>
-                        <li className='space-x-2 flex items-center'><input type="radio" value='0-20' name='labor-strength' /><p>0-20</p></li>
-                        <li className='space-x-2 flex items-center'> <input type="radio" value='20-40' name='labor-strength' /><p>20-40</p></li>
-                        <li className='space-x-2 flex items-center'><input type="radio" value='40-60' name='labor-strength' /><p>40-60</p></li>
-                        <li className='space-x-2 flex items-center'><input type="radio" value='60-80' name='labor-strength' /><p>60-80</p></li>
-                        <li className='space-x-2 flex items-center'><input type="radio" value='80-100' name='labor-strength' /><p>80-100</p></li>
-                        <li className='space-x-2 flex items-center'><input type="radio" value='100+' name='labor-strength' /><p>100+ Labourers</p></li>
+                        <li className='space-x-2 flex items-center'><input type="radio" value='0-20' name='labor-strength' onChange={(e) => handleSelectChange(setLaborStrength, e.target.value)} /><p>0-20</p></li>
+                        <li className='space-x-2 flex items-center'><input type="radio" value='20-40' name='labor-strength' onChange={(e) => handleSelectChange(setLaborStrength, e.target.value)} /><p>20-40</p></li>
+                        <li className='space-x-2 flex items-center'><input type="radio" value='40-60' name='labor-strength' onChange={(e) => handleSelectChange(setLaborStrength, e.target.value)} /><p>40-60</p></li>
+                        <li className='space-x-2 flex items-center'><input type="radio" value='60-80' name='labor-strength' onChange={(e) => handleSelectChange(setLaborStrength, e.target.value)} /><p>60-80</p></li>
+                        <li className='space-x-2 flex items-center'><input type="radio" value='80-100' name='labor-strength' onChange={(e) => handleSelectChange(setLaborStrength, e.target.value)} /><p>80-100</p></li>
+                        <li className='space-x-2 flex items-center'><input type="radio" value='100+' name='labor-strength' onChange={(e) => handleSelectChange(setLaborStrength, e.target.value)} /><p>100+ Laboures</p></li>
                     </ul>
                 </div>
 
                 {/* Business Age */}
                 <div>
-                    <h1 className='font-semibold flex justify-between items-center mr-5 cursor-pointer'>
+                    <h1 className='font-semibold flex justify-between items-center mr-5 mb-2 cursor-pointer'>
                         <p>Business Age</p>
                         <IoIosArrowDown />
                     </h1>
                     <ul className='space-y-1 mt-2'>
-                        <li className='space-x-2 flex items-center'><input type="checkbox" /><p>0-5 Years</p></li>
-                        <li className='space-x-2 flex items-center'><input type="checkbox" /><p>5-10 Years</p></li>
-                        <li className='space-x-2 flex items-center'><input type="checkbox" /><p>10-15 Years</p></li>
-                        <li className='space-x-2 flex items-center'><input type="checkbox" /><p>15-20 Years</p></li>
+                        <li className='space-x-2 flex items-center'><input type="radio" value='0 - 20 Years' name='business-age' onChange={(e) => handleSelectChange(setBusinessAge, e.target.value)} /><p>0-20</p></li>
+                        <li className='space-x-2 flex items-center'><input type="radio" value='20 - 40 Years' name='business-age' onChange={(e) => handleSelectChange(setBusinessAge, e.target.value)} /><p>20-40</p></li>
+                        <li className='space-x-2 flex items-center'><input type="radio" value='40+ Years' name='business-age' onChange={(e) => handleSelectChange(setBusinessAge, e.target.value)} /><p>40+ Years</p></li>
                     </ul>
                 </div>
 
-                {/* Min Projects Completed */}
+                {/* Project Completion */}
                 <div className="relative">
-                    <h1 className='font-semibold flex justify-between items-center mr-5 mb-2 cursor-pointer'>
-                        <p>Min. Projects Completed</p>
+                    <h1 className='font-semibold flex justify-between items-center mr-5 cursor-pointer'>
+                        <p>Project Completion</p>
                         <IoIosArrowDown />
                     </h1>
                     <input
@@ -182,22 +242,21 @@ function SearchSidebar() {
                             transform: 'translateX(-50%)',
                         }}
                     >
-                        {projectCompletion}
-                    </div>
-                    <div className="flex justify-between mt-7">
-                        <div className="bg-white border py-1 px-4">
-                            <p className="text-gray-600">Minimum</p>
-                            <p className="font-semibold">0 Projects</p>
-                        </div>
-                        <div className="bg-white border py-1 px-4">
-                            <p className="text-gray-600">Maximum</p>
-                            <p className="font-semibold">{projectCompletion} Projects</p>
-                        </div>
+                        {projectCompletion}%
                     </div>
                 </div>
+
+                {/* Reset All Button */}
+                <button
+                    onClick={resetAll}
+                    className="w-full  bg-red-600 text-white py-2 rounded-lg mt-10 hover:bg-red-700"
+                >
+                    Reset All
+                </button>
             </aside>
         </div>
-    )
+    );
 }
 
 export default SearchSidebar;
+

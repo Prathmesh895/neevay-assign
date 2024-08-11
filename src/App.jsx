@@ -3,6 +3,7 @@ import Footer from './components/footer'
 import Navbar from './components/navbar'
 import SerchSidebar from './pages/serchSidebar'
 import SerchResult from './pages/serchResult'
+import {Router} from 'react-router-dom'
 
 function App() {
 
