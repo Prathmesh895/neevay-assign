@@ -89,6 +89,7 @@ function SearchSidebar() {
                 </div>
 
                 {/* Search by Office Address Only */}
+                {/* Search by Office Address Only */}
                 <div className='flex items-center space-x-2  w-full justify-between'>
                     <div className='flex items-center space-x-2'>
                         <p>Search by Office Address Only</p>
